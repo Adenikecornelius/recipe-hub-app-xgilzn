@@ -77,7 +77,6 @@ export default function RecipeDetailScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with back button */}
         <View style={styles.headerBar}>
           <Pressable
             style={[styles.backButton, { backgroundColor: colors.secondary }]}
@@ -108,13 +107,11 @@ export default function RecipeDetailScreen() {
           </View>
         </View>
 
-        {/* Recipe Image */}
         <Image
           source={{ uri: recipe.image }}
           style={styles.image}
         />
 
-        {/* Recipe Title and Description */}
         <View style={styles.titleSection}>
           <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
@@ -122,7 +119,6 @@ export default function RecipeDetailScreen() {
           </Text>
         </View>
 
-        {/* Quick Info */}
         <View style={styles.infoGrid}>
           <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <IconSymbol name="clock" size={24} color={colors.primary} />
@@ -143,7 +139,6 @@ export default function RecipeDetailScreen() {
           </View>
         </View>
 
-        {/* Ingredients */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Ingredients</Text>
           <View style={[styles.ingredientsList, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -169,7 +164,6 @@ export default function RecipeDetailScreen() {
           </View>
         </View>
 
-        {/* Cooking Steps */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Cooking Steps</Text>
           <View style={[styles.stepsList, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -190,7 +184,6 @@ export default function RecipeDetailScreen() {
           </View>
         </View>
 
-        {/* Tags */}
         {recipe.tags.length > 0 && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Tags</Text>

@@ -4,8 +4,8 @@ export interface Recipe {
   title: string;
   description: string;
   image: string;
-  prepTime: number; // in minutes
-  cookTime: number; // in minutes
+  prepTime: number;
+  cookTime: number;
   servings: number;
   difficulty: 'easy' | 'medium' | 'hard';
   ingredients: Ingredient[];

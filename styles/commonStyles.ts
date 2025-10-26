@@ -2,16 +2,16 @@
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
 export const colors = {
-  background: '#F5F5DC',      // Beige
-  text: '#333333',             // Dark Gray
-  textSecondary: '#777777',    // Medium Gray
-  primary: '#A0522D',          // Sienna
-  secondary: '#D2691E',        // Chocolate
-  accent: '#BC8F8F',           // Rosy Brown
-  card: '#FFFFFF',             // White
-  highlight: '#E9967A',        // Dark Salmon
-  border: '#E8E8E0',           // Light Beige
-  success: '#6B8E23',          // Olive Green
+  background: '#F5F5DC',
+  text: '#333333',
+  textSecondary: '#777777',
+  primary: '#A0522D',
+  secondary: '#D2691E',
+  accent: '#BC8F8F',
+  card: '#FFFFFF',
+  highlight: '#E9967A',
+  border: '#E8E8E0',
+  success: '#6B8E23',
 };
 
 export const buttonStyles = StyleSheet.create({
