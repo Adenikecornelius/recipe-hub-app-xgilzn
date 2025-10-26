@@ -1,161 +1,141 @@
-import React from "react";
-import { Stack, Link } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View, Text, Alert, Platform } from "react-native";
-import { IconSymbol } from "@/components/IconSymbol";
-import { GlassView } from "expo-glass-effect";
-import { useTheme } from "@react-navigation/native";
 
-const ICON_COLOR = "#007AFF";
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, FlatList, Platform, Pressable, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@react-navigation/native';
+import { Stack } from 'expo-router';
+import { colors } from '@/styles/commonStyles';
+import { recipes } from '@/data/recipes';
+import { RecipeCard } from '@/components/RecipeCard';
+import { useSavedRecipes } from '@/hooks/useSavedRecipes';
+import { IconSymbol } from '@/components/IconSymbol';
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const modalDemos = [
-    {
-      title: "Standard Modal",
-      description: "Full screen modal presentation",
-      route: "/modal",
-      color: "#007AFF",
-    },
-    {
-      title: "Form Sheet",
-      description: "Bottom sheet with detents and grabber",
-      route: "/formsheet",
-      color: "#34C759",
-    },
-    {
-      title: "Transparent Modal",
-      description: "Overlay without obscuring background",
-      route: "/transparent-modal",
-      color: "#FF9500",
-    }
-  ];
+  const { isRecipeSaved, toggleSaveRecipe } = useSavedRecipes();
+  const [searchQuery, setSearchQuery] = React.useState('');
 
-  const renderModalDemo = ({ item }: { item: (typeof modalDemos)[0] }) => (
-    <GlassView style={[
-      styles.demoCard,
-      Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-    ]} glassEffectStyle="regular">
-      <View style={[styles.demoIcon, { backgroundColor: item.color }]}>
-        <IconSymbol name="square.grid.3x3" color="white" size={24} />
-      </View>
-      <View style={styles.demoContent}>
-        <Text style={[styles.demoTitle, { color: theme.colors.text }]}>{item.title}</Text>
-        <Text style={[styles.demoDescription, { color: theme.dark ? '#98989D' : '#666' }]}>{item.description}</Text>
-      </View>
-      <Link href={item.route as any} asChild>
-        <Pressable>
-          <GlassView style={[
-            styles.tryButton,
-            Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)' }
-          ]} glassEffectStyle="clear">
-            <Text style={[styles.tryButtonText, { color: theme.colors.primary }]}>Try It</Text>
-          </GlassView>
-        </Pressable>
-      </Link>
-    </GlassView>
+  const filteredRecipes = useMemo(() => {
+    if (!searchQuery.trim()) return recipes;
+    
+    const query = searchQuery.toLowerCase();
+    return recipes.filter(recipe =>
+      recipe.title.toLowerCase().includes(query) ||
+      recipe.description.toLowerCase().includes(query) ||
+      recipe.tags.some(tag => tag.toLowerCase().includes(query))
+    );
+  }, [searchQuery]);
+
+  const renderRecipe = ({ item }: { item: typeof recipes[0] }) => (
+    <RecipeCard
+      recipe={item}
+      isSaved={isRecipeSaved(item.id)}
+      onSavePress={() => toggleSaveRecipe(item.id)}
+    />
   );
 
-  const renderHeaderRight = () => (
-    <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
-      style={styles.headerButtonContainer}
-    >
-      <IconSymbol name="plus" color={theme.colors.primary} />
-    </Pressable>
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={[styles.headerTitle, { color: colors.text }]}>Recipes</Text>
+      <View style={[styles.searchContainer, { borderColor: colors.border }]}>
+        <IconSymbol name="magnifyingglass" size={18} color={colors.textSecondary} />
+        <TextInput
+          style={[styles.searchInput, { color: colors.text }]}
+          placeholder="Search recipes..."
+          placeholderTextColor={colors.textSecondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <Pressable onPress={() => setSearchQuery('')}>
+            <IconSymbol name="xmark.circle.fill" size={18} color={colors.textSecondary} />
+          </Pressable>
+        )}
+      </View>
+    </View>
   );
 
-  const renderHeaderLeft = () => (
-    <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
-      style={styles.headerButtonContainer}
-    >
-      <IconSymbol
-        name="gear"
-        color={theme.colors.primary}
-      />
-    </Pressable>
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <IconSymbol name="magnifyingglass" size={48} color={colors.textSecondary} />
+      <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+        No recipes found
+      </Text>
+    </View>
   );
 
   return (
-    <>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       {Platform.OS === 'ios' && (
         <Stack.Screen
           options={{
-            title: "Building the app...",
-            headerRight: renderHeaderRight,
-            headerLeft: renderHeaderLeft,
+            title: 'Recipes',
+            headerShown: false,
           }}
         />
       )}
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <FlatList
-          data={modalDemos}
-          renderItem={renderModalDemo}
-          keyExtractor={(item) => item.route}
-          contentContainerStyle={[
-            styles.listContainer,
-            Platform.OS !== 'ios' && styles.listContainerWithTabBar
-          ]}
-          contentInsetAdjustmentBehavior="automatic"
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-    </>
+      <FlatList
+        data={filteredRecipes}
+        renderItem={renderRecipe}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmpty}
+        contentContainerStyle={[
+          styles.listContainer,
+          Platform.OS !== 'ios' && styles.listContainerWithTabBar,
+        ]}
+        scrollIndicatorInsets={{ right: 1 }}
+        showsVerticalScrollIndicator={false}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    // backgroundColor handled dynamically
   },
   listContainer: {
-    paddingVertical: 16,
     paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   listContainerWithTabBar: {
-    paddingBottom: 100, // Extra padding for floating tab bar
+    paddingBottom: 100,
   },
-  demoCard: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+  header: {
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    marginBottom: 16,
+  },
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
   },
-  demoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  demoContent: {
+  searchInput: {
     flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
   },
-  demoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 4,
-    // color handled dynamically
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    gap: 12,
   },
-  demoDescription: {
-    fontSize: 14,
-    lineHeight: 18,
-    // color handled dynamically
-  },
-  headerButtonContainer: {
-    padding: 6,
-  },
-  tryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  tryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    // color handled dynamically
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
